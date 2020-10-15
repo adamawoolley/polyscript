@@ -1,0 +1,9 @@
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  grid-auto-flow: column;
+}
+
+button {
+  display: inline;
+}
