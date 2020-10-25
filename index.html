@@ -11,33 +11,66 @@
     </head>
     <body>
         <div id="app">
-          <label for="chapter-input">Choose a chapter</label>
-          <input id="chapter-input" v-on:keyup.enter="handleInput" v-model="input" v-bind:placeholder="placeholder">
-          <button id="input-button" v-on:click="handleInput">Go!</button>
-          <p id="input-error-chapter" v-if="inputErrorChapter">{{ inputErrorBookInfo }} doesn't include the chapter {{ inputErrorChapterInfo }}</p>
-          <p id="input-error-book" v-if="inputErrorBook">{{ inputErrorBookInfo }} is not a valid book</p>
-          <select id="newLang" v-model="newLang">
-            <option value="" elected="" disabled>New Language</option>
-            <option v-for="lang in Object.keys(langsInfo)" v-if="!langs.find(l => l == lang[0])" v-on:click="addLang" v-bind:value="lang">{{ langsInfo[lang] }}</option><!-- v-if="!langs.find(l => l == lang[0])" v-on:click="addLang" v-bind:value="lang[0]">{{ lang[1] }}<option>-->
-          </select>
-          <div id="scripture-container" class="grid-container" v-bind:style="'grid-template-rows: repeat('+chapters[0].divLength+', auto);'">
+          <nav>
+            <input id="chapter-input" list="book-suggestions" v-on:keyup.enter="handleInput" v-model="input" v-bind:placeholder="placeholder">
+            <button id="input-button" v-on:click="handleInput">Go!</button>
+            <label id="input-error-chapter" v-if="inputErrorChapter">{{ inputErrorBookInfo }} only goes up to chapter {{ inputErrorChapterInfo }}</label>
+            <label id="input-error-book" v-if="inputErrorBook">{{ inputErrorBookInfo }} is not a valid book</label>
+            <template v-if="browser=='chrome' || browser=='firefox' || browser=='safari' || browser=='explorer' || browser=='opera' || browser=='unknown'">
+              <select id="new-lang" v-model="newLang" v-on:change="addLang" v-if="!newLang">
+                <option value="" selected disabled>New Language</option>
+                <option v-for="lang in Object.keys(langsInfo)" v-if="!chapters.find(element => element.lang == lang)" v-bind:value="lang">{{ langsInfo[lang] }}</option>
+              </select>
+            </template>
+            <!--
+            <template v-else-if="browser=='firefox'">
+              <select id="new-lang" v-model="newLang" v-on:change="addLang">
+                <option value="" selected="true" disabled>New Language</option>
+                <option v-for="lang in Object.keys(langsInfo)" v-if="!chapters.find(element => element.lang == lang)" v-bind:value="lang">{{ langsInfo[lang] }}</option>
+              </select>
+            </template>
+            <template v-else>
+              <select id="new-lang" v-model="newLang" v-on:change="addLang">
+                <option value="" selected="true" disabled>New Language</option>
+                <option v-for="lang in Object.keys(langsInfo)" v-if="!chapters.find(element => element.lang == lang)" v-bind:value="lang">{{ langsInfo[lang] }}</option>
+              </select>
+            </template>
+          -->
+          </nav>
+          <button id="previous-chapter" v-on:click="previousChapter">&#8249;</button>
+          <button id="next-chapter" v-on:click="nextChapter">&#8250;</button>
+          <div id="scripture-container" class="grid-container" v-if="chapters" v-bind:style="'grid-template-rows: repeat('+chapters[0].divLength+', auto);'">
             <template v-if="chapters" v-for="language in chapters">
               <div class="chapter-lang-container" v-bind:style="'grid-column-start: '+chapters.indexOf(language)+1+';'">
-                <p class="chapter-lang">{{ langsInfo[language.lang] }}</p>
+                <p class="chapter-lang"><span v-if="language.verses==0">No content for: </span>{{ langsInfo[language.lang] }}</p>
                 <button v-if="chapters.length>1" class="lang-delete-button" v-on:click="removeLang=language.lang;delLang();">Remove</button>
               </div>
-              <p class="book-title" v-bind:style="'grid-column-start: '+chapters.indexOf(language)+1+';'">{{ language.bookTitle || "" }}</p>
-              <p class="book-subtitle" v-bind:style="'grid-column-start: '+chapters.indexOf(language)+1+';'">{{ language.bookSubtitle || "" }}</p>
-              <p class="book-summary" v-bind:style="'grid-column-start: '+chapters.indexOf(language)+1+';'">{{ language.bookSummary || ""}}</p>
-              <p class="chapter-comprising" v-bind:style="'grid-column-start: '+chapters.indexOf(language)+1+';'">{{ language.chapterComprising || "" }}</p>
-              <p class="chapter-title" v-bind:style="'grid-column-start: '+chapters.indexOf(language)+1+';'">{{ language.chapterTitle || "" }}</p>
-              <p class="chapter-summary" v-bind:style="'grid-column-start: '+chapters.indexOf(language)+1+';'">{{ language.chapterSummary || "" }}</p>
-              <template v-for="verse in language.verses">
-                <p class="verse" v-bind:style="'grid-column-start: '+chapters.indexOf(language)+1+';'">{{ verse }}</p>
+              <template v-if="language.verses!=0">
+                <p class="book-title" v-bind:style="'grid-column-start: '+chapters.indexOf(language)+1+';'">{{ language.bookTitle || "" }}</p>
+                <p class="book-subtitle" v-bind:style="'grid-column-start: '+chapters.indexOf(language)+1+';'">{{ language.bookSubtitle || "" }}</p>
+                <p class="book-summary" v-bind:style="'grid-column-start: '+chapters.indexOf(language)+1+'; text-align: '+textAlign(language.lang)+';'">{{ language.bookSummary || ""}}</p>
+                <p class="chapter-comprising" v-bind:style="'grid-column-start: '+chapters.indexOf(language)+1+'; text-align: '+textAlign(language.lang)+';'">{{ language.chapterComprising || "" }}</p>
+                <p class="chapter-title" v-bind:style="'grid-column-start: '+chapters.indexOf(language)+1+';'">{{ language.chapterTitle || "" }}</p>
+                <p class="chapter-summary" v-bind:style="'grid-column-start: '+chapters.indexOf(language)+1+'; text-align: '+textAlign(language.lang)+';'">{{ language.chapterSummary || "" }}</p>
+                <template v-for="verse in language.verses">
+                  <p class="verse" v-bind:style="'grid-column-start: '+chapters.indexOf(language)+1+'; text-align: '+textAlign(language.lang)+';'">{{ verse }}</p>
+                </template>
+                <p id="balance" v-if="language.divLength % 2 == 1"></p>
               </template>
-              <p class="no-content" v-bind:style="'grid-column-start: '+chapters.indexOf(language)+1+';grid-row-start:2;'" v-if="language.verses==0">This content is not available for this language</p>
+              <template v-if="language.verses==0">
+                <p class="filler" v-for="i in fillLength" v-bind:style="'grid-column-start: '+chapters.indexOf(language)+1+'; text-align: '+textAlign(language.lang)+';'"></p>
+                <p id="balance" v-if="fillLength % 2 == 0"></p>
+              </template>
             </template>
           </div>
+          <p>The browser is
+            <span v-if="browser=='chrome'">Chrome</span>
+            <span v-else-if="browser=='firefox'">Firefox</span>
+            <span v-else-if="browser=='explorer'">Explorer</span>
+            <span v-else-if="browser=='safari'">Safari</span>
+            <span v-else-if="browser=='opera'">Opera</span>
+            <span v-else-if="browser=='unknown'">not able to be identified</span>
+          </p>
         </div>
         <script src="info.js"></script>
         <script src="script.js"></script>

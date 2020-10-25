@@ -1,3 +1,24 @@
+function getBrowser() {
+  if (navigator.userAgent) {
+    let userString = navigator.userAgent;
+    if (userString.indexOf('Chrome') > -1) {
+      return 'chrome';
+    } else if (userString.indexOf('Firefox') > -1) {
+      return 'firefox';
+    } else if (userString.indexOf('MSIE') > -1 ||
+                userString.indexOf('rv:') > -1) {
+      return 'explorer';
+    } else if (userString.indexOf('Safari') > -1) {
+      return 'safari';
+    } else if (userString.indexOf('OP') > -1) {
+      return 'opera';
+    } else {
+      return 'unknown';
+    }
+  }
+  return 'unknown';
+}
+
 async function getHtml(url) {
   let response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`)
   if (response.ok) {
@@ -12,19 +33,24 @@ async function getChapter(lang, volume, book, chapter) {
 
   let html = await getHtml(url);
 
-  function getElementText(id) {
+  function getElementText(id, type) {
     if (html.getElementById(id)) {
-      return parseVerse(html.getElementById(id));
+      return parseVerse(html.getElementById(id), type);
     }
     return undefined
   }
 
-  function parseVerse(raw) {
+  function parseVerse(raw, type) {
     let verse = '';
+    //raw.textContent = raw.textContent.match(/\S+/g).slice(1,-1).join(' ');
     let children = raw.childNodes;
-    for (const child of children) {
+    for (let child of children) {
       if (child.tagName == 'A') {
-        verse += child.textContent.slice(1);
+        if (typeof(type) == 'boolean') {
+          verse += child.textContent;
+        } else {
+          verse += child.textContent.slice(1)
+        }
       } else if (child.tagName == 'RUBY') {
         verse += child.children[1].textContent;
       } else if (child.textContent) {
@@ -34,12 +60,12 @@ async function getChapter(lang, volume, book, chapter) {
     return verse;
   }
 
-  let bookTitle = getElementText('title1');
-  let bookSubtitle = getElementText('subtitle1')
-  let bookSummary = getElementText('intro1');
-  let chapterComprising = getElementText('study-intro1');
-  let chapterTitle = getElementText('title_number1');
-  let chapterSummary = getElementText('study_summary1');
+  let bookTitle = getElementText('title1', true);
+  let bookSubtitle = getElementText('subtitle1', true)
+  let bookSummary = getElementText('intro1', true);
+  let chapterComprising = getElementText('study_intro1', true);
+  let chapterTitle = getElementText('title_number1', true);
+  let chapterSummary = getElementText('study_summary1', true);
   let verses = Array.from(html.getElementsByClassName('verse')).map(parseVerse);
 
   return {
@@ -57,6 +83,7 @@ async function getChapter(lang, volume, book, chapter) {
 
 async function getLangs() {
   let url = 'https://www.churchofjesuschrist.org/languages?lang=eng';
+  let studyUrl = 'https://www.churchofjesuschrist.org/study/scriptures?lang='
   let html = await getHtml(url);
   let langInfo = {}
 
@@ -65,7 +92,6 @@ async function getLangs() {
   for (const a of rawLangs) {
     langInfo[a.getAttribute('data-lang')] = a.textContent;
   }
-
   return langInfo;
 }
 
@@ -77,86 +103,83 @@ String.prototype.toTitleCase = function() {
 
 let getBookInfo = (input) => { return booksInfo.find(book => book[0] == input.toTitleCase() || book[1] == input.toLowerCase())};
 
-// Cookie functions courtesy of https://www.w3schools.com/js/js_cookies.asp
-
-function setCookie(cname, cvalue, ctype, exdays) {
-  var d = new Date();
-  d.setTime(d.getTime() + (exdays*24*60*60*1000));
-  var expires = 'expires='+ d.toUTCString();
-  if (ctype == 'JSON') {
-    if (!cvalue.length) {
-      cvalue = '';
-    } else {
-      cvalue = JSON.stringify(cvalue);
-    }
+function setStorage(name, value, type) {
+  let setVal = value;
+  if (type == 'JSON') {
+    setVal = JSON.stringify(value);
   }
-  document.cookie = `${cname}=${cvalue};SameSite=Lax;${expires};path=/`;
-  return cvalue
+  localStorage.setItem(name, setVal);
+  return value;
 }
 
-function getCookie(cname, ctype) {
-  var name = cname + '=';
-  var decodedCookie = decodeURIComponent(document.cookie);
-  var ca = decodedCookie.split(';');
-  for(var i = 0; i <ca.length; i++) {
-    var c = ca[i];
-    while (c.charAt(0) == ' ') {
-      c = c.substring(1);
-    }
-    if (c.indexOf(name) == 0) {
-      if (ctype == 'JSON') {
-        try {
-          return JSON.parse(c.substring(name.length, c.length));
-        } catch (err) {
-          return ''
-        }
-      } else {
-        return c.substring(name.length, c.length);
-      }
+function getStorage(name, type) {
+  let value = localStorage.getItem(name);
+  if (type == 'JSON' && value) {
+    try {
+      return JSON.parse(value);
+    } catch (err) {
+      return value;
     }
   }
-  return '';
+  return value;
 }
 
 async function main() {
-  Vue.use(AsyncComputed, {
-    default: 'Global default value'
-  })
-
   let app = new Vue({
     el: '#app',
 
     data: {
-      volumeShort: '',
-      bookShort: '',
-      bookLong: '',
-      chapter: '',
+      volumeShort: 'bofm',
+      bookShort: '1-ne',
+      bookLong: '1 Nephi',
+      chapter: '1',
       input: '',
       inputErrorChapter: false,
       inputErrorChapterInfo: '',
       inputErrorBook: false,
       inputErrorBookInfo: '',
-      placeholder: '',
+      placeholder: '1 Nephi 1',
       newLang: '',
       removeLang: '',
-      langs: [],
+      chapts: [],
+      unorderedChapters: [],
       langsInfo: [],
       selected: "selected",
+      rightAlignLangs:[
+        'ara',
+        'pes',
+        'urd'
+      ],
+      noContentLangs: [
+        'apw',
+        'hmo',
+        'cag',
+        'ept',
+        'ben',
+        'kan'
+      ],
+      browser: getBrowser()
     },
     created: async function() {
-      this.volumeShort = getCookie('volumeShort') || setCookie('volumeShort', 'bofm');
-      this.bookShort = getCookie('bookShort') || setCookie('bookShort', '1-ne');
-      this.bookLong = getCookie('bookLong') || setCookie('bookLong', '1 Nephi');
-      this.chapter = getCookie('chapter') || setCookie('chapter', '1');
+      this.volumeShort = getStorage('volumeShort') || setStorage('volumeShort', 'bofm');
+      this.bookShort = getStorage('bookShort') || setStorage('bookShort', '1-ne');
+      this.bookLong = getStorage('bookLong') || setStorage('bookLong', '1 Nephi');
+      this.chapter = getStorage('chapter') || setStorage('chapter', '1');
 
-      this.langs = getCookie('langs', 'JSON') || setCookie('langs', ['eng'], 'JSON');
+      let chapters = getStorage('chapters', 'JSON');
+      if (!chapters) {
+        let chapters = [await getChapter('eng', this.volumeShort, this.bookShort, this.chapter)];
+        this.chapts = setStorage('chapters', chapters, 'JSON');
+      } else {
+        this.chapts = chapters;
+      }
 
       this.placeholder = `${this.bookLong} ${this.chapter}`;
 
       this.langsInfo = await getLangs();
     },
     methods: {
-      handleInput: function() {
+      handleInput: async function() {
         let input = this.input.match(/\S+/g);
 
         if (parseInt(input.slice(-1)[0])) {
@@ -169,23 +192,29 @@ async function main() {
 
         let bookInfo = getBookInfo(book);
 
-        this.inputErrorChapterInfo = chapter;
-
         if (bookInfo) {
           this.inputErrorBook = false;
           this.inputErrorBookInfo = bookInfo[0];
           if (parseInt(chapter) > 0 && parseInt(bookInfo[2]) >= parseInt(chapter)) {
 
-            this.volumeShort = setCookie('volumeShort', bookInfo[3]);
-            this.bookShort = setCookie('bookShort', bookInfo[1]);
-            this.bookLong = setCookie('bookLong', bookInfo[0]);
-            this.chapter = setCookie('chapter', chapter);
+            this.volumeShort = setStorage('volumeShort', bookInfo[3]);
+            this.bookShort = setStorage('bookShort', bookInfo[1]);
+            this.bookLong = setStorage('bookLong', bookInfo[0]);
+            this.chapter = setStorage('chapter', chapter);
 
             this.placeholder = `${this.bookLong} ${this.chapter}`;
 
             this.input = '';
             this.inputErrorChapter = false;
+
+            for (i in this.chapts) {
+              this.chapts.splice(i, 1, await getChapter(this.chapts[i].lang, this.volumeShort, this.bookShort, this.chapter));
+            }
+            setStorage('chapters', this.chapts, 'JSON');
+            window.scroll(0,0);
+
           } else {
+            this.inputErrorChapterInfo = bookInfo[2];
             this.inputErrorChapter = true;
             this.input = '';
           }
@@ -195,46 +224,87 @@ async function main() {
           this.input = '';
         }
       },
+      //getBookInfo: function(input, direction) {
+      //  let bookInfo = booksInfo.find(book => book[0] == input.toTitleCase() || book[1] == input.toLowerCase());
+      //  if (direction) {
+      //    let index = booksInfo.indexOf(bookInfo);
+      //    if (direction == 'next') {
+      //      if (parseInt(this.chapter) < parseInt(bookInfo[2])) {
+      //        this.chapters =
+      //      }
+      //      return booksInfo[index%booksInfo.length];
+      //    } else {
+      //      return
+      //    }
+      //    return booksInfo[booksInfo.indexOf(bookInfo)%booksInfo.length];
+      //  } else if (direction == 'back') {
+      //    return booksInfo.slice(booksInfo.indexOf(bookInfo)-1)[booksInfo.indexOf(bookInfo)%booksInfo.length];
+      //  }
+      //},
+      nextChapter: function() {
+        let bookInfo = getBookInfo(this.bookLong);
+        if (parseInt(this.chapter) + 1 <= parseInt(bookInfo[2])) {
+          this.input = this.bookLong + ' ' + (parseInt(this.chapter)+1).toString();
+        } else {
+          bookInfo = booksInfo[(booksInfo.indexOf(bookInfo)+1)%booksInfo.length];
+          this.input = bookInfo[0] + ' ' + '1';
+        }
+        this.handleInput();
+      },
+      previousChapter: function() {
+        let bookInfo = getBookInfo(this.bookLong);
+        if (parseInt(this.chapter) - 1 > 0) {
+          this.input = this.bookLong + ' ' + (parseInt(this.chapter)-1).toString();
+        } else {
+          let index = booksInfo.indexOf(bookInfo) - 1;
+          if (index >= 0) {
+            bookInfo = booksInfo[index];
+            this.input = bookInfo[0] + ' ' + bookInfo[2];
+          } else {
+            bookInfo = booksInfo.slice(-1);
+            this.input = bookInfo[0] + ' ' + bookInfo[2];
+          }
+        }
+        this.handleInput();
+      },
       addLang: function() {
-        this.langs.push(this.newLang);
-        setCookie('langs', this.langs, 'JSON');
+        console.log(this.newLang)
+        getChapter(this.newLang, this.volumeShort, this.bookShort, this.chapter).then(
+          data => {
+            this.chapts.push(data);
+            setStorage('chapters', this.chapts, 'JSON');
+          }
+        )
+        this.newLang = '';
       },
       delLang: function() {
-        console.log(this.langs);
-        console.log(this.removeLang)
-        this.langs.splice(this.langs.indexOf(this.removeLang),1)
-        setCookie('langs', this.langs, 'JSON')
+        let index = this.chapts.indexOf(this.chapts.find(element => element.lang == this.removeLang));
+        this.chapts.splice(index, 1);
+        setStorage('chapters', this.chapts, 'JSON');
+      },
+      textAlign: function(lang) {
+        if (this.rightAlignLangs.includes(lang)) {
+          return 'right';
+        }
+        return 'left';
+        //return `grid-column-start: ${this.chapters.indexOf(language)+1};`
       }
     },
-    asyncComputed: {
-      chapters: {
-        async get() {
-        let chapter_list = [];
-
-        for (const lang of this.langs) {
-          chapter = await getChapter(lang, this.volumeShort, this.bookShort, this.chapter)//.then(data => chapter_list.push(data));
-          chapter_list.push(chapter);
-        }
-
-        return chapter_list;
+    computed: {
+      chapters: function() {
+        return this.chapts;
       },
-      default: []
-      //default: []
-    }
-        //default() {
-        //  return [1,2,3]
-        //}
-    //default: new Array
+      fillLength: function() {
+        let length = 0;
+        for (let language of this.chapts) {
+          if (language.divLength>length) {
+            length = language.divLength
+          }
+        }
+        return length
+      }
     }
   })
 }
 
 main()
-//get() {
-//  let chapter_list = [];
-//
-//  for (const lang of this.langs) {
-//    getChapter(lang, this.volumeShort, this.bookShort, this.chapter).then(data => chapter_list.push(data));
-//  }
-//  return chapter_list;
-//}

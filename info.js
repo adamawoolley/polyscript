@@ -4,13 +4,12 @@ booksInfo = [
 //    "title-page",
 //    "1",
 //    "ot"
+//  [
+//    "Epistle Dedicatory",
+//    "dedication",
+//    "1",
+//    "ot"
 //  ],
-  [
-    "Epistle Dedicatory",
-    "dedication",
-    "1",
-    "ot"
-  ],
   [
     "Genesis",
     "gen",
@@ -503,18 +502,18 @@ booksInfo = [
     "10",
     "bofm"
   ],
-  [
-    "Book of Mormon Pronunciation Guide",
-    "pronunciation",
-    "1",
-    "bofm"
-  ],
-  [
-    "Reference Guide to the Book of Mormon",
-    "reference",
-    "1",
-    "bofm"
-  ],
+//  [
+//    "Book of Mormon Pronunciation Guide",
+//    "pronunciation",
+//    "1",
+//    "bofm"
+//  ],
+//  [
+//    "Reference Guide to the Book of Mormon",
+//    "reference",
+//    "1",
+//    "bofm"
+//  ],
 //  [
 //    "Title Page",
 //    "title-page",
@@ -527,24 +526,24 @@ booksInfo = [
 //    "1",
 //    "dc-testament"
 //  ],
-  [
-    "Chronological Order of Contents",
-    "chron-order",
-    "1",
-    "dc-testament"
-  ],
+//  [
+//    "Chronological Order of Contents",
+//    "chron-order",
+//    "1",
+//    "dc-testament"
+//  ],
   [
     "Sections",
     "dc",
     "138",
     "dc-testament"
   ],
-  [
-    "Official Declarations",
-    "od",
-    "2",
-    "dc-testament"
-  ],
+//  [
+//    "Official Declarations",
+//    "od",
+//    "2",
+//    "dc-testament"
+//  ],
 //  [
 //    "Title Page",
 //    "title-page",

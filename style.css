@@ -1,9 +1,163 @@
+:root {
+  --red: #e63946;
+  --offwhite: #f1faee;
+  --lightblue: #a8dadc;
+  --blue: #457b9d;
+  --darkblue: #1d3557;
+  --paragraph-width: 30em;
+  --offwhite-contrast: #0e0511;
+}
+
+html {
+  font-family: Palatino, "Palatino Linotype", Palatino-Roman, Pahoran, "Pahoran ldsLat", "Noto Sans Myanmar", NotoSansMyanmar, SaysetthaldsLao, NotoSerifTamil, serif;
+  font-size: 1.125em;
+}
+
+.grid-container > p:empty {
+  padding-top: 0em;
+  padding-bottom: 0em;
+  margin-top: 0em;
+  margin-bottom: 0em;
+}
+
 .grid-container {
   display: grid;
-  grid-template-columns: repeat(2, auto);
   grid-auto-flow: column;
+  justify-content: center;
+}
+
+p, .chapter-lang-container {
+  padding-top: 0rem;
+  padding-bottom: 0rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  margin-top: 0rem;
+  margin-bottom: 0rem;
+  margin-left: 0rem;
+  margin-right: 0rem;
+  max-width: 28rem;
+  overflow: auto;
+}
+
+.chapter-lang {
+  padding-left: 0rem;
+}
+
+#balance {
+  padding-left: 0em;
+  padding-right: 0em;
 }
 
 button {
   display: inline;
+  background: linear-gradient(145deg,var(--lightblue),var(--blue));
+  color: #ffffff;
+  text-align: center;
+  border-radius: .3em;
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-top: .25em;
+  padding-bottom: .25em;
+  font-weight: 300;
+  cursor: pointer;
+  border: 0em;
+}
+
+.chapter-lang {
+  display: inline;
+}
+
+.grid-container > p:nth-last-child(odd) {
+  background: var(--offwhite);
+}
+
+.lang-delete-button {
+  float: right;
+}
+
+.book-title {
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  text-align: center;
+  font-size: 1.75em;
+  line-height: 1em;
+  padding-bottom: .35em;
+  padding-top: .15em;
+}
+
+.book-subtitle {
+  font-size: .88em;
+  letter-spacing: .1em;
+  text-align: center;
+  text-transform: uppercase;
+  line-height: 1.33em;
+}
+
+.book-summary {
+  padding-top: 1.5em;
+  padding-bottom: 1.25em;
+}
+
+.chapter-comprising {
+  font-family: Palatino,"Palatino Linotype","Palatino Italic",Palatino-Italic,Pahoran,"Pahoran ldsLat","Noto Sans Myanmar",NotoSansMyanmar,SaysetthaldsLao,NotoSerifTamil,serif;
+  font-weight: 400;
+  font-style: italic;
+  font-stretch: normal;
+  padding-top: .90em;
+  padding-bottom: 1.25em;
+}
+
+.chapter-title {
+  text-align: center;
+  padding-top: .85em;
+  font-size: 1.1em;
+  padding-bottom: .5em;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.chapter-summary {
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: normal;
+  padding-bottom: 1em;
+  font-family: Palatino,"Palatino Linotype","Palatino Italic",Palatino-Italic,Pahoran,"Pahoran ldsLat","Noto Sans Myanmar",NotoSansMyanmar,SaysetthaldsLao,NotoSerifTamil,serif;
+}
+
+.verse {
+  padding-bottom: .65em;
+}
+
+#new-lang {
+  float: right;
+}
+
+nav {
+  position: sticky;
+  position: -webkit-sticky;
+  top: 0px;
+  width: 100%;
+  background: white;
+  height: 2rem;
+}
+
+.chapter-lang-container {
+  position: sticky;
+  position: -webkit-sticky;
+  top: 2rem;
+  background: white;
+}
+
+#previous-chapter, #next-chapter {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 50%;
+}
+
+#previous-chapter {
+  float: left;
+}
+
+#next-chapter {
+  float: right;
 }
