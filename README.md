@@ -1,5 +1,8 @@
 ## Todo
 
-- Add 2 japanese (kanji, and no kanji)
 - add support for references
-- add autocomplete
+- better auto complete for chapter input
+- deangalize input
+- better chinese and japanese fonts
+- default language based on country
+- click and drag to reorder languages

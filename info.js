@@ -569,19 +569,19 @@ booksInfo = [
     "pgp"
   ],
   [
-    "Joseph Smith—Matthew 1",
+    "Joseph Smith—Matthew",
     "js-m",
     "1",
     "pgp"
   ],
   [
-    "Joseph Smith—History 1",
+    "Joseph Smith—History",
     "js-h",
     "1",
     "pgp"
   ],
   [
-    "Articles of Faith 1",
+    "Articles of Faith",
     "a-of-f",
     "1",
     "pgp"

@@ -1,24 +1,3 @@
-function getBrowser() {
-  if (navigator.userAgent) {
-    let userString = navigator.userAgent;
-    if (userString.indexOf('Chrome') > -1) {
-      return 'chrome';
-    } else if (userString.indexOf('Firefox') > -1) {
-      return 'firefox';
-    } else if (userString.indexOf('MSIE') > -1 ||
-                userString.indexOf('rv:') > -1) {
-      return 'explorer';
-    } else if (userString.indexOf('Safari') > -1) {
-      return 'safari';
-    } else if (userString.indexOf('OP') > -1) {
-      return 'opera';
-    } else {
-      return 'unknown';
-    }
-  }
-  return 'unknown';
-}
-
 async function getHtml(url) {
   let response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`)
   if (response.ok) {
@@ -42,7 +21,6 @@ async function getChapter(lang, volume, book, chapter) {
 
   function parseVerse(raw, type) {
     let verse = '';
-    //raw.textContent = raw.textContent.match(/\S+/g).slice(1,-1).join(' ');
     let children = raw.childNodes;
     for (let child of children) {
       if (child.tagName == 'A') {
@@ -52,8 +30,13 @@ async function getChapter(lang, volume, book, chapter) {
           verse += child.textContent.slice(1)
         }
       } else if (child.tagName == 'RUBY') {
-        verse += child.children[1].textContent;
-      } else if (child.textContent) {
+        verse += `<ruby><rb>${child.children[0].textContent}</rb><rt>${child.children[1].textContent}</rt></ruby>`;
+      } else if (child.tagName == 'SPAN' && child.className == 'dominant') {
+        verse += child.innerHTML;
+      }
+      else if (child.textContent) {
+        verse += child.textContent;
+      } else {
         verse += child.textContent;
       }
     }
@@ -95,13 +78,7 @@ async function getLangs() {
   return langInfo;
 }
 
-String.prototype.toTitleCase = function() {
-  return this.toLowerCase().split(' ').map(function(word) {
-    return word.replace(word[0], word[0].toUpperCase());
-  }).join(' ');
-}
-
-let getBookInfo = (input) => { return booksInfo.find(book => book[0] == input.toTitleCase() || book[1] == input.toLowerCase())};
+let getBookInfo = (input) => {return this.booksInfo.find(book => book[0].toLowerCase() == input.toLowerCase() || book[1].toLowerCase() == input.toLowerCase())};
 
 function setStorage(name, value, type) {
   let setVal = value;
@@ -158,7 +135,8 @@ async function main() {
         'ben',
         'kan'
       ],
-      browser: getBrowser()
+      booksInfo: booksInfo,
+      userLang: navigator.language || navigator.userLanguage
     },
     created: async function() {
       this.volumeShort = getStorage('volumeShort') || setStorage('volumeShort', 'bofm');
@@ -167,7 +145,7 @@ async function main() {
       this.chapter = getStorage('chapter') || setStorage('chapter', '1');
 
       let chapters = getStorage('chapters', 'JSON');
-      if (!chapters) {
+      if (!chapters || chapters.length == 0) {
         let chapters = [await getChapter('eng', this.volumeShort, this.bookShort, this.chapter)];
         this.chapts = setStorage('chapters', chapters, 'JSON');
       } else {
@@ -207,8 +185,13 @@ async function main() {
             this.input = '';
             this.inputErrorChapter = false;
 
+            tempChapts = [];
+
             for (i in this.chapts) {
-              this.chapts.splice(i, 1, await getChapter(this.chapts[i].lang, this.volumeShort, this.bookShort, this.chapter));
+              tempChapts.splice(i, 1, getChapter(this.chapts[i].lang, this.volumeShort, this.bookShort, this.chapter));
+            }
+            for (i in tempChapts) {
+              this.chapts.splice(i, 1, await tempChapts[i]);
             }
             setStorage('chapters', this.chapts, 'JSON');
             window.scroll(0,0);
@@ -224,29 +207,12 @@ async function main() {
           this.input = '';
         }
       },
-      //getBookInfo: function(input, direction) {
-      //  let bookInfo = booksInfo.find(book => book[0] == input.toTitleCase() || book[1] == input.toLowerCase());
-      //  if (direction) {
-      //    let index = booksInfo.indexOf(bookInfo);
-      //    if (direction == 'next') {
-      //      if (parseInt(this.chapter) < parseInt(bookInfo[2])) {
-      //        this.chapters =
-      //      }
-      //      return booksInfo[index%booksInfo.length];
-      //    } else {
-      //      return
-      //    }
-      //    return booksInfo[booksInfo.indexOf(bookInfo)%booksInfo.length];
-      //  } else if (direction == 'back') {
-      //    return booksInfo.slice(booksInfo.indexOf(bookInfo)-1)[booksInfo.indexOf(bookInfo)%booksInfo.length];
-      //  }
-      //},
       nextChapter: function() {
         let bookInfo = getBookInfo(this.bookLong);
         if (parseInt(this.chapter) + 1 <= parseInt(bookInfo[2])) {
           this.input = this.bookLong + ' ' + (parseInt(this.chapter)+1).toString();
         } else {
-          bookInfo = booksInfo[(booksInfo.indexOf(bookInfo)+1)%booksInfo.length];
+          bookInfo = this.booksInfo[(this.booksInfo.indexOf(bookInfo)+1)%this.booksInfo.length];
           this.input = bookInfo[0] + ' ' + '1';
         }
         this.handleInput();
@@ -256,25 +222,26 @@ async function main() {
         if (parseInt(this.chapter) - 1 > 0) {
           this.input = this.bookLong + ' ' + (parseInt(this.chapter)-1).toString();
         } else {
-          let index = booksInfo.indexOf(bookInfo) - 1;
+          let index = this.booksInfo.indexOf(bookInfo) - 1;
           if (index >= 0) {
-            bookInfo = booksInfo[index];
+            bookInfo = this.booksInfo[index];
             this.input = bookInfo[0] + ' ' + bookInfo[2];
           } else {
-            bookInfo = booksInfo.slice(-1);
+            bookInfo = this.booksInfo.slice(-1);
             this.input = bookInfo[0] + ' ' + bookInfo[2];
           }
         }
         this.handleInput();
       },
       addLang: function() {
-        console.log(this.newLang)
-        getChapter(this.newLang, this.volumeShort, this.bookShort, this.chapter).then(
-          data => {
-            this.chapts.push(data);
-            setStorage('chapters', this.chapts, 'JSON');
-          }
-        )
+        if (this.newLang) {
+          getChapter(this.newLang, this.volumeShort, this.bookShort, this.chapter).then(
+            data => {
+              this.chapts.push(data);
+              setStorage('chapters', this.chapts, 'JSON');
+            }
+          )
+        }
         this.newLang = '';
       },
       delLang: function() {
@@ -287,7 +254,6 @@ async function main() {
           return 'right';
         }
         return 'left';
-        //return `grid-column-start: ${this.chapters.indexOf(language)+1};`
       }
     },
     computed: {
