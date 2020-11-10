@@ -6,19 +6,29 @@
         <title>Polyscript</title>
         <link href="style.css" rel="stylesheet" type="text/css"/>
         <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+      <!--  <script src="polyfill-datalist.js"></script>-->
+        <script type="text/javascript" src="polyfill-datalist.js"></script>
     </head>
     <body>
         <div id="app">
           <nav class="noselect">
-            <div id="chapter-input-container">
-              <input id="chapter-input" list="book-suggestions" name="chapter" v-on:keyup.enter="handleInput" v-model="input" v-bind:placeholder="placeholder">
-              <datalist id="book-suggestions">
-                <option v-for="book in booksInfo" v-bind:value="book[0]" v-bind:label="`${book[0]} (1..${book[2]})`">
-              </datalist>
-              <span id="input-button" class="noselect" v-on:click="handleInput">
-                &#10132;
-              </span>
-            </div>
+              <form autocomplete="off" action="">
+                <div class="autocomplete" id="chapter-input-container">
+                <!--<input id="myInput" type="text" name="myCountry" placeholder="Country">-->
+                  <input id="chapter-input" type="text" name="chapter" v-model="input" v-bind:placeholder="placeholder" v-on:keyup.enter="handleInput">
+                  <span type="submit" id="input-button" class="noselect" v-on:click="handleInput">
+                    &#10132;
+                  </span>
+                </div>
+                <!--<input type="submit">-->
+              </form>
+              <!--<div class="autocomplete">
+                <input id="chapter-input" type="text" name="chapter" v-on:keyup.enter="handleInput" v-model="input" v-bind:placeholder="placeholder">
+              </div>-->
+              <!--<datalist id="book-suggestions">
+                <option v-for="book in booksInfo" v-bind:value="book[0]" v-bind:label="`${book[0]} (1..${book[2]})`"></option>
+                <option v-for="book in booksInfo" v-bind:value="book[0]">{{ book[0] + ' (1..' + book[2] + ')' }}</option>
+              </datalist>-->
             <label id="input-error-chapter" v-if="inputErrorChapter">{{ inputErrorBookInfo }} only goes up to chapter {{ inputErrorChapterInfo }}</label>
             <label id="input-error-book" v-if="inputErrorBook">{{ inputErrorBookInfo }} is not a valid book</label>
             <select id="new-lang" v-model="newLang" v-on:change="addLang" v-if="!newLang">
@@ -58,6 +68,8 @@
           </div>
           <div v-else>
             <img src="squiggle.png" alt="Looping Arrow">
+          </div>
+          <div id="scrape-container">
           </div>
           <p>©Ethan Woolley 2020</p>
         </div>

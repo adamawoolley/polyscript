@@ -121,7 +121,7 @@ p, .chapter-lang-container {
 nav {
   position: sticky;
   position: -webkit-sticky;
-  top: 0px;
+  top: 0rem;
   width: 100%;
   background: white;
   height: 2rem;
@@ -143,11 +143,11 @@ nav {
 }
 
 #previous-chapter, #next-chapter {
-  position: -webkit-sticky;
   position: sticky;
-  padding-top: 20%;
-  padding-bottom: 20%;
-  top: 5%;
+  position: -webkit-sticky;
+  padding-top: 35vh;
+  padding-bottom: 45vh;
+  top: 5vh;
   cursor: pointer;
 }
 
@@ -170,28 +170,6 @@ nav {
 #next-chapter {
   float: right;
   padding-right: 0em;
-}
-
-#chapter-input-container {
-  border: .15rem solid #DDD;
-  display: inline-block;
-  border-radius: .5em;
-}
-
-#chapter-input {
-  border: none;
-  padding: 0em;
-  height: 1.5em;
-}
-
-#input-button {
-  cursor: pointer;
-  padding-right: .5em;
-  border-left: 0;
-}
-
-#input-button:hover {
-  color: var(--blue);
 }
 
 /* Thank you https://stackoverflow.com/questions/826782/how-to-disable-text-selection-highlighting */
@@ -217,5 +195,80 @@ div, p {
 
 .chapter-lang-delete {
   padding-right: 0em;
+  float: right;
+}
+
+/* Courtesy of https://www.w3schools.com/howto/howto_js_autocomplete.asp
+changed to fit my needs*/
+* { box-sizing: border-box; }
+
+form {
+  display: inline;
+  width: 50%;
+}
+
+.autocomplete {
+  /*the container must be positioned relative:*/
+  position: relative;
+}
+
+#chapter-input-container {
+  border: .15rem solid #DDD;
+  display: inline-block;
+  border-radius: .5em;
+}
+
+#chapter-input {
+  border: none;
+  padding: 0em;
+  height: 1.5em;
+  display: inline-block;
+  max-width: 88%;
+}
+
+#input-button {
+  cursor: pointer;
+  padding-right: 0em;
+  border-left: 0;
+}
+
+#input-button:hover {
+  color: var(--blue);
+};
+}
+
+.autocomplete-items {
+  position: absolute;
+  border: 1px solid #d4d4d4;
+  border-bottom: none;
+  border-top: none;
+  z-index: 1000;
+  /*position the autocomplete items to be the same width as the container:*/
+  top: 100%;
+  left: 0;
+  right: 0;
+  display: inline-block;
+}
+
+.autocomplete-items div {
+  padding: 10px;
+  cursor: pointer;
+  background-color: #fff;
+  border-bottom: 1px solid #d4d4d4;
+  display: block;
+}
+
+.autocomplete-items div:hover {
+  /*when hovering an item:*/
+  background-color: #e9e9e9;
+}
+
+.autocomplete-active {
+  /*when navigating through the items using the arrow keys:*/
+  background-color: DodgerBlue !important;
+  color: #ffffff;
+}
+
+.chapter-range {
   float: right;
 }
