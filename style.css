@@ -26,6 +26,7 @@ html {
   display: grid;
   grid-auto-flow: column;
   justify-content: center;
+  margin-top: 2rem;
 }
 
 .grid-container > p:nth-last-child(odd) {
@@ -119,12 +120,14 @@ p, .chapter-lang-container {
 }
 
 nav {
-  position: sticky;
-  position: -webkit-sticky;
+  position: fixed;
   top: 0rem;
   width: 100%;
   background: white;
   height: 2rem;
+  padding-top: .5rem;
+  padding-right: 1rem;
+  z-index: 1;
 }
 
 .chapter-lang-container {
@@ -143,8 +146,7 @@ nav {
 }
 
 #previous-chapter, #next-chapter {
-  position: sticky;
-  position: -webkit-sticky;
+  position: fixed;
   padding-top: 35vh;
   padding-bottom: 45vh;
   top: 5vh;
@@ -170,6 +172,7 @@ nav {
 #next-chapter {
   float: right;
   padding-right: 0em;
+  left: 98%;
 }
 
 /* Thank you https://stackoverflow.com/questions/826782/how-to-disable-text-selection-highlighting */
@@ -242,7 +245,6 @@ form {
   border: 1px solid #d4d4d4;
   border-bottom: none;
   border-top: none;
-  z-index: 1000;
   /*position the autocomplete items to be the same width as the container:*/
   top: 100%;
   left: 0;
