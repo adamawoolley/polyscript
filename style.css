@@ -51,6 +51,7 @@ p, .chapter-lang-container {
   text-decoration: line-through;
   cursor: pointer;
   overflow: hidden;
+  
 }
 
 #balance {
@@ -273,4 +274,12 @@ form {
 
 .chapter-range {
   float: right;
+}
+
+.float-right {
+  float: right;
+}
+
+.float-left {
+    float: left;
 }
