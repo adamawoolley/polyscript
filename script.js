@@ -43,7 +43,7 @@ async function main() {
 
       let chapters = getStorage('chapters', 'JSON');
       if (!chapters || chapters.length == 0) {
-        let chapters = [await getChapter('eng', this.volumeShort, this.bookShort, this.chapter)];
+        let chapters = [await getChapter('eng', this.volumeShort, this.bookShort, this.chapter), await getChapter('jpn', this.volumeShort, this.bookShort, this.chapter), await getChapter('ara', this.volumeShort, this.bookShort, this.chapter)];
         this.chapts = setStorage('chapters', chapters, 'JSON');
       } else {
         this.chapts = chapters;
