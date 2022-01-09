@@ -11,7 +11,7 @@
         <div id="app">
           <nav class="noselect sticky">
               <form autocomplete="off" action="">
-                <div class="autocomplete" id="chapter-input-container">
+                <div class="autocomplete" title="Search new chapter" id="chapter-input-container">
                   <input id="chapter-input" type="text" name="chapter" v-model="input" v-bind:placeholder="placeholder" v-on:keyup.enter="handleInput">
                   <span type="submit" id="input-button" class="noselect" v-on:click="handleInput">
                     &#10132;
@@ -20,20 +20,20 @@
               </form>
             <label id="input-error-chapter" v-if="inputErrorChapter">{{ inputErrorBookInfo }} only goes up to chapter {{ inputErrorChapterInfo }}</label>
             <label id="input-error-book" v-if="inputErrorBook">{{ inputErrorBookInfo }} is not a valid book</label>
-            <select id="new-lang" v-model="newLang" v-on:change="addLang" v-if="!newLang">
+            <select id="new-lang" title="Add a new language" v-model="newLang" v-on:change="addLang" v-if="!newLang">
               <option value="" selected disabled>&#10133;</option>
               <option v-for="lang in Object.keys(langsInfo)" v-if="!chapters.find(element => element.lang == lang) && !noContentLangs.includes(lang)" v-bind:value="lang">{{ langsInfo[lang] }}</option>
             </select>
           </nav>
-          <div id="previous-chapter" class="noselect" v-on:click="previousChapter">
+          <div id="previous-chapter" title="Previous chapter" class="noselect" v-on:click="previousChapter">
             <span id="previous-chapter-button">&#8249;</span>
           </div>
-          <div id="next-chapter" class="noselect" v-on:click="nextChapter">
+          <div id="next-chapter" title="Next chapter" class="noselect" v-on:click="nextChapter">
             <span id="next-chapter-button">&#8250;</span>
           </div>
           <div id="scripture-container" class="grid-container" v-if="chapters && chapters.length > 0" v-bind:style="'grid-template-rows: repeat('+chapters[0].divLength+', auto);'">
             <template v-if="chapters" v-for="language in chapters">
-              <div class="chapter-lang-container noselect sticky" v-bind:style="'grid-column-start: '+chapters.indexOf(language)+1+';'" v-on:click="removeLang=language.lang;delLang();">
+              <div class="chapter-lang-container noselect sticky" title="Delete language" v-bind:style="'grid-column-start: '+chapters.indexOf(language)+1+';'" v-on:click="removeLang=language.lang;delLang();">
                 <p class="chapter-lang"><span v-if="language.verses==0">No content for: </span>{{ langsInfo[language.lang] }}</p>
                 <p class="chapter-lang-delete">&#128465;</p>
               </div>
@@ -60,7 +60,14 @@
           </div>
           <div id="scrape-container">
           </div>
-          <p>©Ethan Woolley 2020</p>
+          <footer>
+            <div class="float-left">
+              All content comes from <a href="https://churchofjesuschrist.org/study/scriptures" target="_blank" rel="noopener noreferrer">The Church of Jesus Christ of Latter-Day Saints</a>.
+            </div>
+            <div class="float-right">
+                 <a href="https://github.com/adamawoolley/polyscript" target="_blank" rel="noopener noreferrer">The code for this site</a>. <a href="mailto:adamawoolley@gmail.com?subject=Polyscript" target="_blank" rel="noopener noreferrer">Contact me</a>.
+            </div>
+          </footer>
         </div>
         <script src="info.js"></script>
         <script src="script.js"></script>
